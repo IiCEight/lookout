@@ -30,6 +30,7 @@ from tracker.presentation.status import data_status
 from tracker.presentation.values import (
     buildsystem,
     cell,
+    check_diagnostics,
     check_value,
     field,
     module,
@@ -119,8 +120,7 @@ def listing(payload, query):
 def _coverage_table(payload, focus, links, title):
     filtered = any(c.dimension == 'check:' + focus['id']
                    for c in links.editor.query.conditions)
-    reasons = {pkg['name']: pkg['monitors'][focus['id']]['check'].get('error') or
-               pkg['monitors'][focus['id']]['check'].get('note')
+    reasons = {pkg['name']: check_diagnostics(pkg['monitors'][focus['id']]['check'])
                for pkg in payload['items']} if filtered else {}
     show_reason = any(reasons.values())
     columns = [Column(title='Package', role='identity')]
@@ -137,7 +137,7 @@ def _coverage_table(payload, focus, links, title):
             source = module(pkg, 'source')
             cells.append(cell([text(source['data'].get('version') if source else None, kind='code')]))
             if show_reason:
-                cells.append(cell([text(reasons[pkg['name']], tone='notice')]))
+                cells.append(cell(*([text(message, tone='notice')] for message in reasons[pkg['name']])))
         else:
             check = pkg['monitors'][focus['id']]['check']
             cells += [cell([check_value(check)]), cell([stamp(check.get('checked_at'))])]
@@ -224,8 +224,7 @@ def detail(pkg, collection=None):
     for result in pkg['monitors'].values():
         check = result['check']
         status_lines = [[check_value(check)]]
-        failures = check.get('failures') or [check.get('error')]
-        diagnostics = dict.fromkeys([*failures, check.get('note')])
+        diagnostics = check_diagnostics(check)
         status_lines.extend([text(message, tone='notice' if check_failed(check) else 'muted')]
                             for message in diagnostics if message)
         timestamps = [[stamp(check.get('checked_at'))]]

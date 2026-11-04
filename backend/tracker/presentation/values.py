@@ -119,6 +119,11 @@ def version_value(pkg, *, compact=True, links=None):
     return current + annotations
 
 
+def check_diagnostics(check):
+    return list(dict.fromkeys(message for message in
+        [check.get('error'), *check.get('failures', []), check.get('note')] if message))
+
+
 def check_value(check):
     status = check['status']
     return text(CHECK_LABELS.get(status, status.replace('_', ' ')),
