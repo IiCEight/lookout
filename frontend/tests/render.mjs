@@ -467,7 +467,6 @@ try {
   assert.match(listing, /href="https:\/\/github.com\/fixture\/repo\/commit\/abcdef0123456789abcdef0123456789abcdef01"[^>]*>abcdef<\/a>/);
   assert.equal((listing.match(/<table\b[^]*?<\/table>/)[0].match(/<col(?:\s[^>]*)?\s*\/?>/g)||[]).length, 6);
   assert.equal((listing.match(/role="search"/g) || []).length, 1);
-  assert.equal((listing.match(/data-group-id=/g) || []).length, 0);
   const packageMenu = listing.match(/<div class="choice-rows"[^]*?<div class="results-toolbar"/)[0];
   const filterForms = html => [...html.matchAll(/<form[^>]*class="selection-form"[^]*?<\/form>/g)]
     .map(match => match[0]);

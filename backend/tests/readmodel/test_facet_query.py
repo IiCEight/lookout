@@ -65,14 +65,23 @@ def test_empty_model_selections_are_normalized_but_empty_url_values_are_invalid(
 def test_all_small_combinations_match_literal_set_algebra():
     choices = [None, (), ('a',), ('b',), ('a', 'b')]
     index = {'one': {'a': {0, 1}, 'b': {1, 2}}, 'two': {'a': {0, 2}, 'b': {1, 3}}}
-    for first, second in product(choices, repeat=2):
+    for first, second, scope in product(choices, choices, (ALL, frozenset({0, 2}))):
         selected = {d: v for d, v in [('one', first), ('two', second)] if v is not None}
         query = FilterQuery(selections=selected)
-        expected = ALL
+        expected = scope
         for dimension, values in selected.items():
             if values:
                 expected &= set().union(*(index[dimension][value] for value in values))
-        assert Evaluation(index, ALL, query).matches == expected
+        result = Evaluation(index, scope, query)
+        assert result.matches == expected
+        for dimension, options in index.items():
+            eligible = scope
+            for other, values in selected.items():
+                if other != dimension and values:
+                    eligible &= set().union(*(index[other][value] for value in values))
+            for value in (*options, 'missing'):
+                assert result.count(Condition(dimension=dimension, value=value)) == len(
+                    eligible & options.get(value, set()))
         encoded = encode_parameters(query.parameters())
         assert FilterQuery.extract(parse_qsl(encoded, keep_blank_values=True))[0] == query
 
