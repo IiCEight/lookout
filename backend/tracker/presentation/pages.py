@@ -58,11 +58,7 @@ def identity_cell(pkg, links, *, labels=True):
     identity = [text(pkg['name'], href=pkg['detail_url'], kind='code')]
     signals = []
     if labels:
-        version = module(pkg, 'version')
-        if version and Issue.OUTDATED in version['dimensions'].get('maintenance', []):
-            signals.append(text(Issue.OUTDATED, kind='tag', appearance=appearance(Issue.OUTDATED),
-                                href=links.condition('maintenance', Issue.OUTDATED)))
-        signals.extend(check_failed_label(pkg, links, exclude_kind='version'))
+        signals.extend(check_failed_label(pkg, exclude_kind='version'))
         for result in pkg['monitors'].values():
             if result['data']['kind'] in ('evidence', 'requires'):
                 signals.extend(evidence_labels(result, links, counts=True))
@@ -76,7 +72,7 @@ def identity_cell(pkg, links, *, labels=True):
     return cell(identity)
 
 
-def check_failed_label(pkg, links=None, *, exclude_kind=None):
+def check_failed_label(pkg, *, exclude_kind=None):
     errors = [result for result in pkg['monitors'].values()
               if result['data']['kind'] != exclude_kind and check_failed(result['check'])]
     if not errors:
@@ -84,7 +80,7 @@ def check_failed_label(pkg, links=None, *, exclude_kind=None):
     anchor = 'check-' + errors[0]['id'] if len(errors) == 1 else 'checks'
     return [text(Issue.CHECK_FAILED, kind='tag', appearance=appearance(Issue.CHECK_FAILED),
                  title=', '.join(caption(result['title']) for result in errors),
-                 href=links.condition('maintenance', Issue.CHECK_FAILED) if links else pkg['detail_url'] + '#' + anchor)]
+                 href=pkg['detail_url'] + '#' + anchor)]
 
 
 def listing(payload, query):
@@ -119,7 +115,7 @@ def listing(payload, query):
 
 def _coverage_table(payload, focus, links, title):
     filtered = any(c.dimension == 'check:' + focus['id']
-                   for c in links.editor.query.conditions)
+                   for c in links.filters.conditions)
     reasons = {pkg['name']: check_diagnostics(pkg['monitors'][focus['id']]['check'])
                for pkg in payload['items']} if filtered else {}
     show_reason = any(reasons.values())

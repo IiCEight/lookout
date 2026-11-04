@@ -56,5 +56,5 @@ def test_build_choices_follow_obs_order_without_changing_aggregation_rank():
     for selected in ('', 'failed'):
         result = index.select(filters=conjunction({'buildsystem': '', 'maintenance': [], **{'build:' + target: value for target, value in ({'target': selected}).items()}}), page=1, per_page=100)
         assert [item['value'] for item in result['build_statuses']['target']] == [*codes, 'future-state']
-        assert all(item['count'] == int(not selected or item['value'] == selected) for item in result['build_statuses']['target'])
+        assert all(item['count'] == 1 for item in result['build_statuses']['target'])
     assert build_status.describe('failed').rank < build_status.describe('succeeded').rank

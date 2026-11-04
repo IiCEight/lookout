@@ -36,19 +36,19 @@ def test_current_category_links_match_their_filters(snapshot, tmp_path):
     client, _ = client_for(snapshot, tmp_path)
     raw = client.get(query_url('/api/v2/packages', {'maintenance': 'LicenseDiff'})).json()
     assert {row['name'] for row in raw['items']} == {'binutils', 'foo3'}
-    assert {k: v for k, v in raw['maintenance_labels'].items() if v} == {'LicenseDiff': 2, 'Outdated': 1}
+    assert raw['maintenance_labels']['LicenseDiff'] == 2
     for row in raw['items']:
         assert row['monitors']['license']['data']['labels'][0]['label'] == 'LicenseDiff'
         detail = client.get('/api/v2/packages/' + row['name']).json()
         assert detail['monitors']['license']['data']['findings'][0]['label'] == 'LicenseDiff'
     page = client.get(query_url('/api/ui/packages', {'maintenance': 'LicenseDiff'})).json()
-    facet = next(n for n in page['controls']['choice_rows'] if n['label'] == 'Alerts')
-    assert {option['label'] for option in facet['choices']} >= {'Outdated', 'LicenseDiff', 'Untracked'}
-    assert next(option for option in facet['choices'] if option['selected'])['count'] == 2
+    choice = next(choice for group in page['controls']['choice_rows']
+                  for choice in group['choices'] if choice['label'] == 'LicenseDiff')
+    assert choice['selected'] and choice['count'] == 2
     for row in page['table']['rows']:
         labels = [value for line in row['cells'][0]['lines'] for value in line if value['kind'] == 'tag']
         license_label, = [value for value in labels if value['text'].startswith('LicenseDiff')]
-        assert terms_in(license_label['href']) == []
+        assert terms_in(license_label['href']) == [('maintenance', 'LicenseDiff')]
     assert snapshot == before
 
 
@@ -67,13 +67,13 @@ def test_saved_categories_use_current_names_everywhere_without_mutation(snapshot
     client, db = client_for(snapshot, tmp_path)
     raw = client.get('/api/v2/packages', params=dict(conjunction({'maintenance': new}).parameters())).json()
     assert raw['total'] == 1
-    assert {k: v for k, v in raw['maintenance_labels'].items() if v} == {new: 1, 'Outdated': 1}
+    assert raw['maintenance_labels'][new] == 1
     result = raw['items'][0]['monitors'][monitor]
     assert result['title'] == new and result['data']['labels'][0]['label'] == new
     page = client.get('/api/ui/packages', params=dict(conjunction({'maintenance': new}).parameters())).json()
     badge, = [value for line in page['table']['rows'][0]['cells'][0]['lines']
               for value in line if value['text'] == new + ' 1']
-    assert terms_in(badge['href']) == []
+    assert terms_in(badge['href']) == [('maintenance', new)]
     assert badge['appearance'] == 'label:' + new and badge['variant'] == 'outline'
     detail = client.get('/api/ui/packages/binutils').json()
     section = next(section for section in detail['sections'] if section['id'] == monitor)

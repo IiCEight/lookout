@@ -29,12 +29,6 @@ def palettes():
             for key, item in CATALOG.items() if 'style' in item}
 
 
-def facets(counts):
-    defaults = dict.fromkeys((key for key, item in CATALOG.items() if item.get('facet')), 0)
-    return {key: count for key, count in (defaults | counts).items()
-            if CATALOG.get(key, {}).get('facet', True)}
-
-
 def icon(value):
     return CATALOG.get(value, {}).get("icon")
 
