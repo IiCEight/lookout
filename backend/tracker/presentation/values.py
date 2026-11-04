@@ -41,7 +41,7 @@ def module(pkg, kind):
 
 
 def buildsystem(value, links):
-    return text(value, kind='tag', variant='solid', appearance='buildsystem:' + value,
+    return text(value, kind='tag', size='small', appearance='buildsystem:' + value,
                 href=links.condition('buildsystem', value))
 
 

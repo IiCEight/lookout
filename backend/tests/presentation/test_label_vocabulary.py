@@ -74,7 +74,7 @@ def test_saved_categories_use_current_names_everywhere_without_mutation(snapshot
     badge, = [value for line in page['table']['rows'][0]['cells'][0]['lines']
               for value in line if value['text'] == new + ' 1']
     assert terms_in(badge['href']) == [('maintenance', new)]
-    assert badge['appearance'] == 'label:' + new and badge['variant'] == 'outline'
+    assert badge['appearance'] == 'label:' + new and badge['size'] == 'normal'
     detail = client.get('/api/ui/packages/binutils').json()
     section = next(section for section in detail['sections'] if section['id'] == monitor)
     assert section['title'] == new + ' · 1'
@@ -104,7 +104,7 @@ def test_custom_fallback_keeps_its_identity_and_last_position(selected):
     assert choice.selected is selected
     assert choice.icon is None
     assert terms_in(choice.href) == ([] if selected else [('buildsystem', '_not_detected')])
-    assert buildsystem('cmake', Links()).variant == 'solid'
+    assert buildsystem('cmake', Links()).size == 'small'
 
 
 @pytest.mark.parametrize('status', ['not_declared', 'unknown'])
@@ -130,10 +130,22 @@ def test_declared_icons_follow_identity_without_frontend_category_rules():
 
 def test_emphasis_has_one_palette_and_order_not_provider_severity():
     groups = [('Outdated', 'Advisory', 'DepMismatch', 'EOL', 'Yanked'),
-              ('DepChanges', 'LicenseDiff'), ('Untracked', 'CheckFailed')]
+              ('DepChanges', 'LicenseDiff', 'CheckFailed'), ('Untracked',)]
     theme = palettes()
     for rank, labels in enumerate(groups):
         assert {priority(label) for label in labels} == {rank}
         assert {priority(appearance(label)) for label in labels} == {rank}
         assert len({theme[appearance(label)]['background'] for label in labels}) == 1
     assert len({theme[appearance(group[0])]['background'] for group in groups}) == 3
+
+
+def test_palette_rejects_trailing_css_and_is_readable_on_white():
+    from tracker.presentation.labels import tag_palette
+    assert tag_palette('#123456;display:none') is None
+    assert tag_palette('#fff') is None
+    for source in ('#ffffff', '#000000', '#e9ce3b', '#3776ab'):
+        palette = tag_palette(source)
+        channels = [int(palette['background'][i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        linear = [v / 12.92 if v <= .04045 else ((v + .055) / 1.055) ** 2.4 for v in channels]
+        luminance = sum(v * weight for v, weight in zip(linear, (.2126, .7152, .0722)))
+        assert 1.05 / (luminance + .05) >= 4.5

@@ -45,7 +45,7 @@ def test_version_labels_follow_the_same_selection_in_their_own_columns(client):
     for row in rows.values():
         identity, = row['cells'][0]['lines']
         assert identity[0]['text'] == row['key']
-        systems = [i for i, value in enumerate(identity) if value['variant'] == 'solid']
+        systems = [i for i, value in enumerate(identity) if value['size'] == 'small']
         assert not systems or systems == [1]
 
 

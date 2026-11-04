@@ -309,11 +309,11 @@ export interface components {
              */
             kind: "text" | "code" | "tag" | "time" | "icon";
             /**
-             * Variant
-             * @default outline
+             * Size
+             * @default normal
              * @enum {string}
              */
-            variant: "outline" | "solid";
+            size: "normal" | "small";
             /**
              * Tone
              * @default normal

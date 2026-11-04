@@ -19,7 +19,7 @@ class Text(DocumentModel):
     title: str | None = None
     aria_label: str | None = None
     kind: Literal['text', 'code', 'tag', 'time', 'icon'] = 'text'
-    variant: Literal['outline', 'solid'] = 'outline'
+    size: Literal['normal', 'small'] = 'normal'
     tone: Literal['normal', 'muted', 'positive', 'negative', 'notice'] = 'normal'
     appearance: str | None = None
     datetime: str | None = None

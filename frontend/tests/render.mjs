@@ -625,7 +625,7 @@ try {
   appearancePalette = {custom: {background: '#654321', foreground: '#eeeeee'},
     'unsafe\"}body{color:red}': {background: '#123456;display:none', foreground: '#ffffff'}};
   const changedPaletteCSS = await read('/presentation.css');
-  assert.match(changedPaletteCSS, /--appearance-background:#654321;--appearance-foreground:#eeeeee/);
+  assert.match(changedPaletteCSS, /--appearance-background:#654321;--appearance-foreground:#ffffff/);
   assert.doesNotMatch(changedPaletteCSS, /unsafe|body|display|#123456/);
   for (const icon of ['rust', 'waf']) {
     appearancePalette = {custom: {background: '#123456', foreground: '#ffffff', icon}};
@@ -854,7 +854,7 @@ try {
   const css=await wire(cssPath,{'Accept-Encoding':'gzip'});assert.equal(css.status,200);assert.equal(css.headers['content-encoding'],'gzip');assert.match(css.headers['cache-control'],/immutable/);assert.ok(gunzipSync(css.body).length>css.body.length);
   const appCSS = gunzipSync(css.body).toString();
   assert.ok([...appCSS.matchAll(/([^{}]+)\{([^{}]*)\}/g)].some(([, selectors, body]) => selectors.split(',').includes('.value-tag') && body.includes('var(--appearance-background')), 'tag colors use the declared palette');
-  assert.match(appCSS, /\.value-tag\[data-variant=solid\]\{[^}]*var\(--appearance-foreground/);
+  assert.match(appCSS, /\.value-tag\[data-size=small\]/);
   const range=await wire(cssPath,{'Accept-Encoding':'gzip',Range:'bytes=0-9'});assert.equal(range.status,206);assert.equal(range.headers['content-encoding'],undefined);assert.equal(range.body.length,10);
   assert.equal((await wire('/',{},'HEAD')).body.length,0);
   const json=await wire('/api/v2/packages',{'Accept-Encoding':'gzip'});assert.equal(json.status,200);assert.equal(json.headers['cache-control'],'no-store');assert.equal(json.headers['content-encoding'],'gzip');assert.ok(JSON.parse(gunzipSync(json.body)).items.length>0);

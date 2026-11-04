@@ -380,10 +380,16 @@ a.value-tag {
   color: light-dark(var(--appearance-background, var(--fg)),
     color-mix(in srgb, var(--appearance-background, var(--fg)) 35%, var(--fg)));
 }
-.value-tag[data-variant="solid"] {
-  background: var(--appearance-background, var(--head));
-  color: var(--appearance-foreground, var(--fg));
-  border-color: transparent;
+.value-tag {
+  background: light-dark(#fff, var(--appearance-background, #626b75));
+  color: light-dark(var(--appearance-background, #626b75), #fff);
+  border-color: var(--appearance-background, #626b75);
+}
+.value-tag[data-size="small"] {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0 4px;
+  min-height: 0;
 }
 .column-identity a.value-code {
   font-weight: 500;

@@ -22,7 +22,7 @@ style = "important"
 style = "neutral"
 
 [labels."CheckFailed"]
-style = "neutral"
+style = "warning"
 
 [labels."DepMismatch"]
 style = "important"

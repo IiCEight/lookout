@@ -4,7 +4,7 @@ from tracker.monitors.model import check_failed
 from tracker.presentation.activity import open_links
 from tracker.presentation.build import build_note
 from tracker.presentation.evidence import evidence_labels
-from tracker.presentation.labels import appearance, caption, palettes, priority
+from tracker.presentation.labels import appearance, caption, palettes, priority, tag_palette
 from tracker.presentation.model import (
     Choice,
     Column,
@@ -240,5 +240,5 @@ def detail(pkg, collection=None):
 
 
 def theme(presentation):
-    return {'appearances': {**palettes(), **{'buildsystem:' + key: {k: value[k] for k in ('background', 'foreground')}
-            for key, value in presentation.get('buildsystems', {}).items()}}}
+    return {'appearances': {**palettes(), **{'buildsystem:' + key: colors
+            for key, value in presentation.get('buildsystems', {}).items() if (colors := tag_palette(value['background'])) is not None}}}
