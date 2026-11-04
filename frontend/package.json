@@ -16,8 +16,8 @@
     "quality": "npm run lint && npm run unused && npm run boundaries",
     "duplicates": "cd .. && jscpd --config .jscpd.json --no-gitignore --fail-on-empty --no-tips",
     "duplicates:similar": "npm run duplicates -- --min-lines 5 --min-tokens 50 --ignore-identifiers",
-    "postinstall": "node scripts/harden-http-cache.cjs",
-    "prebuild": "node scripts/harden-http-cache.cjs"
+    "postinstall": "node scripts/harden-http-cache.cjs && node scripts/adapt-redocly.cjs",
+    "prebuild": "node scripts/harden-http-cache.cjs && node scripts/adapt-redocly.cjs"
   },
   "dependencies": {
     "@astrojs/node": "11.1.9",
@@ -40,5 +40,8 @@
   },
   "engines": {
     "node": "^26.11.1"
+  },
+  "overrides": {
+    "minimatch@<11.0.1": "11.0.4"
   }
 }

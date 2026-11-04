@@ -1,6 +1,7 @@
 // Render the production SSR bundle against deterministic API observations.
 import assert from 'node:assert/strict';
 import './http-cache.cjs';
+import './redocly.cjs';
 import './render-cache.mjs';
 import {noteRows} from '../src/lib/document.ts';
 import {spawn, spawnSync} from 'node:child_process';
